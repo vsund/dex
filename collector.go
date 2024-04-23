@@ -135,10 +135,36 @@ func (c *DockerCollector) networkMetrics(ch chan<- prometheus.Metric, containerS
 }
 
 func (c *DockerCollector) memoryMetrics(ch chan<- prometheus.Metric, containerStats *types.StatsJSON, cName string) {
-	// From official documentation
-	//Note: On Linux, the Docker CLI reports memory usage by subtracting page cache usage from the total memory usage.
-	//The API does not perform such a calculation but rather provides the total memory usage and the amount from the page cache so that clients can use the data as needed.
-	memoryUsage := containerStats.MemoryStats.Usage - containerStats.MemoryStats.Stats["cache"]
+	// Note: An old version of this code subtracted the "cache" stat from the cgroup's memory usage.
+	// However, this stat only exists for cgroup v1. cgroup v2 uses the "file" stat for the same value.
+	// This lead to containerStats.MemoryStats.Stats["cache"] being the default value of 0 and therefore
+	// effectively reporting the cgroup's memory usage including the disk cache of the kernel
+	// (which can vastly overestimate the "true" memory usage in many cases).
+	//
+	// Actually, Docker (and cAdvisor and likely more) use total_inactive_file/inactive_file nowadays.
+	// Although being (probably?) more precise when it comes to enforcing resources, I think it makes more
+	// sense to use the effectively used memory usage like before (but fixed for cgroup v2).
+	//
+	// Further reading:
+	//   - https://github.com/docker/cli/blob/26.1/cli/command/container/stats_helpers.go#L227-L249
+	//   - https://www.kernel.org/doc/Documentation/cgroup-v1/memory.txt
+	//   - https://www.kernel.org/doc/Documentation/cgroup-v2.txt
+
+	var kernelDiskCacheKeyName string
+	_, isCgroupV1 := containerStats.MemoryStats.Stats["cache"]
+	if isCgroupV1 {
+		kernelDiskCacheKeyName = "cache"
+	}
+	_, isCgroupV2 := containerStats.MemoryStats.Stats["file"]
+	if isCgroupV2 {
+		kernelDiskCacheKeyName = "file"
+	}
+
+	if !isCgroupV1 && !isCgroupV2 {
+		log.WithField("container", cName).Warn("could not find \"cache\" stat (cgroup v1) nor \"file\" stat (cgroup v2)")
+	}
+
+	memoryUsage := containerStats.MemoryStats.Usage - containerStats.MemoryStats.Stats[kernelDiskCacheKeyName]
 	memoryTotal := containerStats.MemoryStats.Limit
 
 	memoryUtilization := float64(memoryUsage) / float64(memoryTotal) * 100.0
