@@ -174,15 +174,15 @@ func (c *DockerCollector) blockIoMetrics(ch chan<- prometheus.Metric, containerS
 	}
 
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
-		"dex_block_io_read_bytes",
-		"Block I/O read bytes",
+		"dex_block_io_read_bytes_total",
+		"Block I/O read bytes total",
 		labelCname,
 		nil,
 	), prometheus.CounterValue, float64(readTotal), cName)
 
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
-		"dex_block_io_write_bytes",
-		"Block I/O write bytes",
+		"dex_block_io_write_bytes_total",
+		"Block I/O write bytes total",
 		labelCname,
 		nil,
 	), prometheus.CounterValue, float64(writeTotal), cName)
