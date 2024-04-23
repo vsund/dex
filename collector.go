@@ -147,8 +147,8 @@ func (c *DockerCollector) memoryMetrics(ch chan<- prometheus.Metric, containerSt
 	//
 	// Further reading:
 	//   - https://github.com/docker/cli/blob/26.1/cli/command/container/stats_helpers.go#L227-L249
-	//   - https://www.kernel.org/doc/Documentation/cgroup-v1/memory.txt
-	//   - https://www.kernel.org/doc/Documentation/cgroup-v2.txt
+	//   - https://docs.kernel.org/admin-guide/cgroup-v1/memory.html#stat-file
+	//   - https://docs.kernel.org/admin-guide/cgroup-v2.html#memory-interface-files
 
 	var kernelDiskCacheKeyName string
 	_, isCgroupV1 := containerStats.MemoryStats.Stats["cache"]
