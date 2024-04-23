@@ -121,13 +121,13 @@ func (c *DockerCollector) CPUMetrics(ch chan<- prometheus.Metric, containerStats
 
 func (c *DockerCollector) networkMetrics(ch chan<- prometheus.Metric, containerStats *types.StatsJSON, cName string) {
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
-		"dex_network_rx_bytes",
+		"dex_network_rx_bytes_total",
 		"Network received bytes total",
 		labelCname,
 		nil,
 	), prometheus.CounterValue, float64(containerStats.Networks["eth0"].RxBytes), cName)
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
-		"dex_network_tx_bytes",
+		"dex_network_tx_bytes_total",
 		"Network sent bytes total",
 		labelCname,
 		nil,
