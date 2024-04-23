@@ -120,18 +120,20 @@ func (c *DockerCollector) CPUMetrics(ch chan<- prometheus.Metric, containerStats
 }
 
 func (c *DockerCollector) networkMetrics(ch chan<- prometheus.Metric, containerStats *types.StatsJSON, cName string) {
-	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
-		"dex_network_rx_bytes",
-		"Network received bytes total",
-		[]string{labelCname},
-		nil,
-	), prometheus.CounterValue, float64(containerStats.Networks["eth0"].RxBytes), cName)
-	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
-		"dex_network_tx_bytes",
-		"Network sent bytes total",
-		[]string{labelCname},
-		nil,
-	), prometheus.CounterValue, float64(containerStats.Networks["eth0"].TxBytes), cName)
+	for interfaceName, stats := range containerStats.Networks {
+		ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
+			"dex_network_rx_bytes_total",
+			"Network received bytes total",
+			[]string{labelCname, "interface"},
+			nil,
+		), prometheus.CounterValue, float64(stats.RxBytes), cName, interfaceName)
+		ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
+			"dex_network_tx_bytes_total",
+			"Network sent bytes total",
+			[]string{labelCname, "interface"},
+			nil,
+		), prometheus.CounterValue, float64(stats.TxBytes), cName, interfaceName)
+	}
 }
 
 func (c *DockerCollector) memoryMetrics(ch chan<- prometheus.Metric, containerStats *types.StatsJSON, cName string) {
