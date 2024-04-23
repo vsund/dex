@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var labelCname = []string{"container_name"}
+const labelCname = "container_name"
 
 type DockerCollector struct {
 	cli *client.Client
@@ -65,7 +65,7 @@ func (c *DockerCollector) processContainer(container types.Container, ch chan<- 
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_container_running",
 		"1 if docker container is running, 0 otherwise",
-		labelCname,
+		[]string{labelCname},
 		nil,
 	), prometheus.GaugeValue, isRunning, cName)
 
@@ -107,14 +107,14 @@ func (c *DockerCollector) CPUMetrics(ch chan<- prometheus.Metric, containerStats
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_cpu_utilization_percent",
 		"CPU utilization in percent",
-		labelCname,
+		[]string{labelCname},
 		nil,
 	), prometheus.GaugeValue, cpuUtilization, cName)
 
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_cpu_utilization_seconds_total",
 		"Cumulative CPU utilization in seconds",
-		labelCname,
+		[]string{labelCname},
 		nil,
 	), prometheus.CounterValue, float64(totalUsage)/1e9, cName)
 }
@@ -123,13 +123,13 @@ func (c *DockerCollector) networkMetrics(ch chan<- prometheus.Metric, containerS
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_network_rx_bytes",
 		"Network received bytes total",
-		labelCname,
+		[]string{labelCname},
 		nil,
 	), prometheus.CounterValue, float64(containerStats.Networks["eth0"].RxBytes), cName)
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_network_tx_bytes",
 		"Network sent bytes total",
-		labelCname,
+		[]string{labelCname},
 		nil,
 	), prometheus.CounterValue, float64(containerStats.Networks["eth0"].TxBytes), cName)
 }
@@ -145,19 +145,19 @@ func (c *DockerCollector) memoryMetrics(ch chan<- prometheus.Metric, containerSt
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_memory_usage_bytes",
 		"Total memory usage bytes",
-		labelCname,
+		[]string{labelCname},
 		nil,
 	), prometheus.CounterValue, float64(memoryUsage), cName)
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_memory_total_bytes",
 		"Total memory bytes",
-		labelCname,
+		[]string{labelCname},
 		nil,
 	), prometheus.CounterValue, float64(memoryTotal), cName)
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_memory_utilization_percent",
 		"Memory utilization percent",
-		labelCname,
+		[]string{labelCname},
 		nil,
 	), prometheus.GaugeValue, memoryUtilization, cName)
 }
@@ -176,14 +176,14 @@ func (c *DockerCollector) blockIoMetrics(ch chan<- prometheus.Metric, containerS
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_block_io_read_bytes",
 		"Block I/O read bytes",
-		labelCname,
+		[]string{labelCname},
 		nil,
 	), prometheus.CounterValue, float64(readTotal), cName)
 
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_block_io_write_bytes",
 		"Block I/O write bytes",
-		labelCname,
+		[]string{labelCname},
 		nil,
 	), prometheus.CounterValue, float64(writeTotal), cName)
 }
@@ -192,7 +192,7 @@ func (c *DockerCollector) pidsMetrics(ch chan<- prometheus.Metric, containerStat
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_pids_current",
 		"Current number of pids in the cgroup",
-		labelCname,
+		[]string{labelCname},
 		nil,
 	), prometheus.CounterValue, float64(containerStats.PidsStats.Current), cName)
 }
