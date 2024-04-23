@@ -147,13 +147,13 @@ func (c *DockerCollector) memoryMetrics(ch chan<- prometheus.Metric, containerSt
 		"Total memory usage bytes",
 		labelCname,
 		nil,
-	), prometheus.CounterValue, float64(memoryUsage), cName)
+	), prometheus.GaugeValue, float64(memoryUsage), cName)
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_memory_total_bytes",
 		"Total memory bytes",
 		labelCname,
 		nil,
-	), prometheus.CounterValue, float64(memoryTotal), cName)
+	), prometheus.GaugeValue, float64(memoryTotal), cName)
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_memory_utilization_percent",
 		"Memory utilization percent",
@@ -194,5 +194,5 @@ func (c *DockerCollector) pidsMetrics(ch chan<- prometheus.Metric, containerStat
 		"Current number of pids in the cgroup",
 		labelCname,
 		nil,
-	), prometheus.CounterValue, float64(containerStats.PidsStats.Current), cName)
+	), prometheus.GaugeValue, float64(containerStats.PidsStats.Current), cName)
 }
