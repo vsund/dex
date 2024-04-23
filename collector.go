@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -61,13 +62,23 @@ func (c *DockerCollector) processContainer(container types.Container, ch chan<- 
 		isRunning = 1
 	}
 
+	containerCreated := time.Unix(container.Created, 0).Format(time.DateTime)
+
 	// container state metric for all containers
 	ch <- prometheus.MustNewConstMetric(prometheus.NewDesc(
 		"dex_container_running",
 		"1 if docker container is running, 0 otherwise",
-		[]string{labelCname},
+		[]string{
+			labelCname,
+			"container_id",
+			"container_created",
+			"image",
+			"image_id",
+			"state",
+			"status",
+		},
 		nil,
-	), prometheus.GaugeValue, isRunning, cName)
+	), prometheus.GaugeValue, isRunning, cName, container.ID, containerCreated, container.Image, container.ImageID, container.State, container.Status)
 
 	// stats metrics only for running containers
 	if isRunning == 1 {
